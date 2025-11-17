@@ -1,0 +1,930 @@
+
+% -------------------------------------------------------------------
+% Preamble
+% -------------------------------------------------------------------
+\documentclass[12pt]{beamer}
+\setbeamertemplate{footline}[frame number]
+\usepackage[most]{tcolorbox} % Include tcolorbox package
+\usepackage{xcolor} 
+\usepackage{amsmath} % For align* environment
+
+% Choose a different theme and color scheme compared to the original
+\usetheme{default} 
+\usecolortheme{whale}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}  % for better fonts
+\usepackage{tikz}
+\usepackage{graphicx}
+
+%-------------------------------------------------------------------
+% Color Definitions (Add to Preamble)
+%-------------------------------------------------------------------
+\definecolor{PrimaryBlue}{RGB}{0, 76, 151}    % Dark blue from whale theme
+\definecolor{AccentOrange}{RGB}{237, 125, 49} % Warm contrast color
+\definecolor{LightGray}{RGB}{245, 245, 245}   % For subtle backgrounds
+\definecolor{DarkGray}{RGB}{64, 64, 64}       % For text and frames
+
+%-------------------------------------------------------------------
+% Revised Bertrand's Box
+%-------------------------------------------------------------------
+\newtcolorbox{bertrandbox}{
+  colback=LightGray,
+  colframe=DarkGray,
+  boxrule=0.6pt,
+  arc=2pt,
+  fontupper=\color{DarkGray},
+  left=6pt,
+  right=6pt,
+  top=4pt,
+  bottom=4pt
+}
+
+% Add to preamble
+\usepackage{calc} % For \dimexpr calculations
+\newcommand{\resultarrow}{\hfill\ensuremath{\rightarrow\ }} % Consistent arrow format
+
+\newcommand{\bertrandpostulat}{
+  \begin{bertrandbox}
+    \small For every $n \geq 1$ there is some prime number $p$ with $n < p \leq 2n$
+  \end{bertrandbox}
+  %\vspace{1em}
+}
+%-------------------------------------------------------------------
+%Header Format
+%-------------------------------------------------------------------
+
+\newcommand{\header}[1]{%
+% Use the frametitle foreground color and desired size
+{% Group to keep color change local
+  \usebeamercolor[fg]{frametitle}% Get the correct text color
+  \scriptsize % Set desired font size
+  #1% Use provided argument
+}%
+}
+
+%-------------------------------------------------------------------
+%PascalTriangle - Normal
+%-------------------------------------------------------------------
+\newcommand{\PascalTriangle}[2][odd node/.style={text=gray!60, inner sep=1.5pt}]{%
+% #1 = TikZ style definition(s) (optional, defaults to setting 'odd node' style with gray text)
+% #2 = Max Row Number (mandatory)
+\begin{tikzpicture}[
+    scale=0.75, % Default scale, adjust as needed
+    transform shape,
+    base node/.style={inner sep=1.5pt, text=black}, % Base style for ALL nodes (explicitly black text)
+    #1 % Apply the user/default style definitions here (defines/overrides 'odd node')
+  ]
+  % Define spacing
+  \def\hdist{1.3} % Horizontal distance factor
+  \def\vdist{0.9} % Vertical distance between rows
+
+  % Loop through rows (n from 0 up to the provided argument #2)
+  \foreach \n in {0,...,#2} {
+    % Loop through elements in the row (k from 0 to n)
+    \foreach \k in {0,...,\n} {
+      % Calculate node position
+      \pgfmathsetmacro{\xpos}{(\k - \n/2) * \hdist}
+      \pgfmathsetmacro{\ypos}{-\n * \vdist}
+
+      % Place the node, applying 'odd node' style conditionally
+      \ifodd\n % TeX primitive to check if \n is odd
+        \node [base node] at (\xpos, \ypos) {$\binom{\n}{\k}$}; % Use gray style
+      \else
+        \node [base node] at (\xpos, \ypos) {$\binom{\n}{\k}$}; % Use base (black) style
+      \fi
+    }
+  }
+
+  % Pre-calculate the y-coordinate for the ellipsis
+  \pgfmathsetmacro{\ellipsisypos}{-(#2 + 1) * \vdist}
+  % Add ellipsis below the last row using the base (black) style
+  \node [base node] at (0, \ellipsisypos) {$\ldots$};
+
+\end{tikzpicture}% End TikZ picture
+}
+
+%-------------------------------------------------------------------
+%PascalTriangle - highligh rows
+%-------------------------------------------------------------------
+\newcommand{\PascalTriangleHighlight}[2][odd node/.style={text=gray!60, inner sep=1.5pt}]{%
+% #1 = TikZ style definition(s) (optional, defaults to setting 'odd node' style with gray text)
+% #2 = Max Row Number (mandatory)
+\begin{tikzpicture}[
+    scale=0.75, % Default scale, adjust as needed
+    transform shape,
+    base node/.style={inner sep=1.5pt, text=black}, % Base style for ALL nodes (explicitly black text)
+    #1 % Apply the user/default style definitions here (defines/overrides 'odd node')
+  ]
+  % Define spacing
+  \def\hdist{1.3} % Horizontal distance factor
+  \def\vdist{0.9} % Vertical distance between rows
+
+  % Loop through rows (n from 0 up to the provided argument #2)
+  \foreach \n in {0,...,#2} {
+    % Loop through elements in the row (k from 0 to n)
+    \foreach \k in {0,...,\n} {
+      % Calculate node position
+      \pgfmathsetmacro{\xpos}{(\k - \n/2) * \hdist}
+      \pgfmathsetmacro{\ypos}{-\n * \vdist}
+
+      % Place the node, applying 'odd node' style conditionally
+      \ifodd\n % TeX primitive to check if \n is odd
+        \node [base node, odd node] at (\xpos, \ypos) {$\binom{\n}{\k}$}; % Use gray style
+      \else
+        \node [base node] at (\xpos, \ypos) {$\binom{\n}{\k}$}; % Use base (black) style
+      \fi
+    }
+  }
+
+  % Pre-calculate the y-coordinate for the ellipsis
+  \pgfmathsetmacro{\ellipsisypos}{-(#2 + 1) * \vdist}
+  % Add ellipsis below the last row using the base (black) style
+  \node [base node] at (0, \ellipsisypos) {$\ldots$};
+
+\end{tikzpicture}% End TikZ picture
+}
+
+%-------------------------------------------------------------------
+%PascalTriangle - highligh middle elements
+%-------------------------------------------------------------------
+\newcommand{\PascalTriangleHighlightMid}[2][highlight node/.style={text=PrimaryBlue}]{%
+ \begin{tikzpicture}[
+     scale=0.75,
+     transform shape,
+     base node/.style={inner sep=1.5pt, text=black},
+     odd node/.style={text=gray!60, inner sep=1.5pt}, % Original gray style
+     #1 % Custom styles (highlight node or override odd node)
+   ]
+   % Maintain original spacing
+   \def\hdist{1.3}
+   \def\vdist{0.9}
+
+   \foreach \n in {0,...,#2} {
+     \foreach \k in {0,...,\n} {
+       \pgfmathsetmacro{\xpos}{(\k - \n/2) * \hdist}
+       \pgfmathsetmacro{\ypos}{-\n * \vdist}
+
+       % First apply odd row styling
+       \ifodd\n
+         \node [base node, odd node] at (\xpos, \ypos) {$\binom{\n}{\k}$};
+       \else
+         % Then check for middle node in even rows
+         \pgfmathtruncatemacro{\twok}{2*\k}
+         \ifnum\twok=\n
+           \node [base node, highlight node] at (\xpos, \ypos) {$\binom{\n}{\k}$};
+         \else
+           \node [base node] at (\xpos, \ypos) {$\binom{\n}{\k}$};
+         \fi
+       \fi
+     }
+   }
+
+   % Maintain original ellipsis placement
+   \pgfmathsetmacro{\ellipsisypos}{-(#2 + 1) * \vdist}
+   \node [base node] at (0, \ellipsisypos) {$\ldots$};
+ \end{tikzpicture}%
+}
+%-------------------------------------------------------------------
+%PascalTriangle - Sum
+%-------------------------------------------------------------------
+\newcommand{\PascalHighlightSum}[2][highlight node/.style={text=PrimaryBlue}]{%
+ \begin{tikzpicture}[
+     scale=0.75,
+     transform shape,
+     base node/.style={inner sep=1.5pt, text=black},
+     odd node/.style={text=gray!60, inner sep=1.5pt},
+     sum node/.style={base node, anchor=west}, % Style for sum equation
+     #1
+   ]
+   \def\hdist{1.3}
+   \def\vdist{0.9}
+
+   \foreach \n in {0,...,#2} {
+     % Draw binomial coefficients
+     \foreach \k in {0,...,\n} {
+       \pgfmathsetmacro{\xpos}{(\k - \n/2) * \hdist}
+       \pgfmathsetmacro{\ypos}{-\n * \vdist}
+
+       \ifodd\n
+         \node [base node, odd node] at (\xpos, \ypos) {$\binom{\n}{\k}$};
+       \else
+         \pgfmathtruncatemacro{\twok}{2*\k}
+         \ifnum\twok=\n
+           \node [base node, highlight node] at (\xpos, \ypos) {$\binom{\n}{\k}$};
+         \else
+           \node [base node] at (\xpos, \ypos) {$\binom{\n}{\k}$};
+         \fi
+       \fi
+     }
+     
+     % Add plus signs between nodes (only if row has >1 element)
+     \ifnum\n>0
+       \foreach \k in {0,...,\numexpr\n-1} {
+         \pgfmathsetmacro{\plusx}{(\k + 0.5 - \n/2) * \hdist}
+         \pgfmathsetmacro{\ypos}{-\n * \vdist}
+         \ifodd\n
+           \node [base node, odd node] at (\plusx, \ypos) {$+$};
+         \else
+           \node [base node] at (\plusx, \ypos) {$+$};
+         \fi
+       }
+     \fi
+     
+     % Add row sum equation
+     \pgfmathsetmacro{\sumx}{(\n/2 + 0.7) * \hdist}
+     \node [sum node] at (\sumx, -\n*\vdist) {$ = \enspace 2^{\n}$};
+   }
+
+   % Maintain ellipsis placement
+   \pgfmathsetmacro{\ellipsisypos}{-(#2 + 1) * \vdist}
+   \node [base node] at (0, \ellipsisypos) {$\ldots$};
+ \end{tikzpicture}%
+}
+%-------------------------------------------------------------------
+% Central Question Box (Subtle + Centered + Dynamic Sizing)
+%-------------------------------------------------------------------
+\newtcolorbox{centralquestionbox}{
+  colback=LightGray!20,
+  colframe=PrimaryBlue!30,
+  boxrule=0.8pt,
+  arc=2pt,
+  left=8pt,
+  right=8pt,
+  top=8pt,
+  bottom=8pt,
+  fontupper={\sffamily\normalsize\color{DarkGray!80}\centering}, % Centered text
+  shadow={0.5pt}{-0.5pt}{0pt}{0pt}{LightGray!80},
+  before upper={\vspace*{0.2em}},
+  after upper={\vspace*{0.2em}},
+  overlay={
+    \node[anchor=north east] at (frame.north east) 
+    {\textcolor{LightGray!60}{\fontsize{18}{18}\selectfont ?}};
+  }
+}
+
+\newcommand{\centralquestion}[1]{
+  \begin{centralquestionbox}
+    #1
+  \end{centralquestionbox}
+}
+%-------------------------------------------------------------------
+% Result Box Styling
+%-------------------------------------------------------------------
+\newtcolorbox{resultbox}{
+  colback=AccentOrange!5,
+  colframe=AccentOrange!80,
+  boxrule=0.8pt,
+  arc=2pt,
+  fontupper=\color{DarkGray}
+}
+
+\newcommand{\finalresult}[1]{
+  \vspace{-0.5em}
+  \begin{resultbox}
+    \small #1
+  \end{resultbox}
+  \vspace{0.5em}
+}
+
+%-------------------------------------------------------------------
+% Core Box Styling
+%-------------------------------------------------------------------
+\newtcolorbox{corebox}{
+  colback=PrimaryBlue!5,
+  colframe=PrimaryBlue!80,
+  boxrule=0.8pt,
+  arc=2pt,
+  fontupper=\color{DarkGray}
+}
+
+\newcommand{\corecontent}[1]{
+  \vspace{-0.5em}
+  \begin{corebox}
+    \small #1
+  \end{corebox}
+  \vspace{0.5em}
+}
+
+%-----------------------------------------------------------------
+%remove toolbox at bottom right
+%-----------------------------------------------------------------
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{}
+
+
+%-------------------------------------------------------------------
+%Document starts
+%-------------------------------------------------------------------
+
+\title[Bertrand's Postulate]{Bertrand's Postulate}
+\subtitle{For every $n \geq 1$ there is some prime $p$ with $n < p \leq 2n$}
+\author{Haaroon Hussain \& Wanja Stämpfli}
+\date{\today}
+
+\begin{document}
+
+% -------------------------------------------------------------------
+% Title page
+% -------------------------------------------------------------------
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% -------------------------------------------------------------------
+% Definition
+% -------------------------------------------------------------------
+
+\begin{frame}[t]{Definition}
+ \vspace{1em}
+  \bertrandpostulat
+  
+  \vfill
+  \begin{center}
+   \begin{tikzpicture}[x=1\textwidth/86, y=1cm]
+     \draw[->] (0,0) -- (86,0);
+     \foreach \x in {3, 5, 7, 13, 23, 43, 83} {
+       \draw[PrimaryBlue, thick] (\x, -0.15) -- (\x, 0.15) node[above, font = \scriptsize] {\x};
+       \draw[AccentOrange, thick] (30, -0.2) -- (30, 0.2) node[above, font = \scriptsize] {$n$};
+       \draw[AccentOrange, thick] (60, -0.2) -- (60, 0.2) node[above, font = \scriptsize] {$2n$};      
+       }
+     \node[below right] at (86,0) {};
+   \end{tikzpicture}
+  \end{center}
+  \vfill
+\end{frame}
+
+% -------------------------------------------------------------------
+% History
+% -------------------------------------------------------------------
+
+% highlight Erdös to indicate that we look at his proof
+
+\begin{frame}{History}
+  \begin{itemize}\setlength{\itemsep}{1.5em}
+        \item \textbf{Bertrand (1845)}: Conjectured the statement after verifying it for $n \leq 3,000,000$.
+        \item \textbf{Chebyshev (1852)}: Provided the first rigorous proof using factorial and prime properties.
+        \item \textbf{Ramanujan (1919)}: Shorter proof using Sterling Formula.
+        \item \textbf{Erdős (1932)}: Elegant combinatorial proof using no calculus.
+
+    \end{itemize}
+
+\end{frame} 
+
+% -------------------------------------------------------------------
+% General Approach - Overview 1
+% -------------------------------------------------------------------
+
+\begin{frame}[t]
+  \frametitle{%
+    General Approach % Left part
+    \hfill % Push the box to the right
+    \raisebox{2pt}[\dimexpr\height-1pt][0pt]{% Fine-tune vertical alignment if needed
+      \header{For every $n \geq 1$ there is some prime $p$ with $n < p \leq 2n$}
+    }%
+  }
+  \vspace{1em}
+ 
+  % --- Content for Slide 1 ---
+  \bertrandpostulat
+   \vfill
+   \begin{center}
+     \begin{itemize}
+       \setlength{\itemsep}{2em} % Apply spacing here
+       \item Choose $f(n)$ that contains these primes $p$
+       \item Find a lower bound $f_{\min}(n)\le f(n)$
+       \item If no primes in $(n,2n]$ then $f_{\min}(n) \le f(n)$ only holds for $n < N$
+       \item Verify for $n < N$
+     \end{itemize}    
+   \end{center}
+   \vfill
+ \end{frame}
+% -------------------------------------------------------------------
+% General Approach -  choosing f(n)
+% -------------------------------------------------------------------
+
+\begin{frame}[t]
+ \frametitle{%
+   General Approach % Left part
+   \hfill % Push the box to the right
+   \raisebox{2pt}[\dimexpr\height-1pt][0pt]{% Fine-tune vertical alignment if needed
+     \header{For every $n \geq 1$ there is some prime $p$ with $n < p \leq 2n$}
+   }%
+ }
+ \vspace{1em}
+
+
+ % --- Content for Slide 2 ---
+ \only<1-2>{
+  \begin{itemize}
+    \item Choose $f(n)$ that contains these primes $p$
+  \end{itemize}
+     \begin{block}{}
+       $$
+       \binom{2n}{n}=\frac{(2n)!}{n!n!}
+       $$
+       \only<2>{\textbf{Example: $n=4$}
+       \vspace{1em}
+       $$
+       \binom{8}{4}= \frac{\textcolor{red}{5} \cdot 6 \cdot \textcolor{red}{7} \cdot 8}{2 \cdot 3 \cdot 4 } = 
+       \frac{\textcolor{red}{5} \cdot (2 \cdot 3) \cdot \textcolor{red}{7} \cdot 2^3}{2 \cdot 3 \cdot 2^2 } = \textcolor{red}{5} \cdot \textcolor{red}{7} \cdot 2
+       $$}
+     \end{block}
+ } % End of content for slide 2
+
+\end{frame}
+% -------------------------------------------------------------------
+% General Approach - Lowerbound
+% -------------------------------------------------------------------
+
+\begin{frame}[t]
+  \frametitle{%
+    General Approach % Left part
+    \hfill % Push the box to the right
+    \raisebox{2pt}[\dimexpr\height-1pt][0pt]{% Fine-tune vertical alignment if needed
+      \header{For every $n \geq 1$ there is some prime $p$ with $n < p \leq 2n$}
+    }%
+  }
+  \vspace{1em} 
+   \begin{itemize}
+     \item Find a lower bound $f_{\min}(n)\le \binom{2n}{n}$
+   \end{itemize}
+      \vfill
+      \begin{center}
+        \only<1>{
+          \PascalTriangle{6}
+        }
+        \only<2>{
+          \PascalTriangleHighlight{6}
+        }
+        \only<3>{
+          \PascalTriangleHighlightMid{6}
+        }
+        \only<4>{
+         \PascalHighlightSum{6}
+        }
+        \only<5>{
+          $$
+          2^{2n} \overset{(1)}{\le} 2n \cdot \binom{2n}{n} \implies f_{min}(n) = \frac{2^{2n}}{2n}
+          $$
+          
+        }
+      \end{center}
+      \vfill
+      \only<5>{\scriptsize (1): $\binom{2n}{0} + \binom{2n}{2n} \le \binom{2n}{n}$}
+ \end{frame}
+ % -------------------------------------------------------------------
+% General Approach - Overview 2
+% -------------------------------------------------------------------
+
+\begin{frame}[t]
+  \frametitle{%
+    General Approach % Left part
+    \hfill % Push the box to the right
+    \raisebox{2pt}[\dimexpr\height-1pt][0pt]{% Fine-tune vertical alignment if needed
+      \header{For every $n \geq 1$ there is some prime $p$ with $n < p \leq 2n$}
+    }%
+  }
+  \vspace{1em}
+ 
+  % --- Content for Slide 1 ---
+   \vfill
+   \begin{center}
+     \begin{itemize}
+       \setlength{\itemsep}{2em} % Apply spacing here
+       \item $\binom{2n}{n}$ contains all primes in $(n, 2n]$
+       \item $\frac{2^{2n}}{2n} \le \binom{2n}{n}$
+       \item If no primes in $(n,2n]$ then $\frac{2^{2n}}{2n} \le \binom{2n}{n}$ only holds for $n < N$
+       \item Verify for $n < N$
+     \end{itemize}
+   \end{center}
+   \vfill
+ \end{frame}
+% -------------------------------------------------------------------
+% Contradiction slide
+% -------------------------------------------------------------------
+\begin{frame}{Contradiction Slide}
+  \textbf{Contradiction:}
+
+  Assume $\exists n$ such that there is no prime $p$ with $n<p\le 2n$, 
+  then show that $\binom{2n}{n}$ is smaller than some fixed lowerbound.
+  
+  
+  $$
+  Lowerbound \le \binom{2n}{n}= \prod_{p_i \le n}p_i^{r_i} \cdot \prod_{n < p_i \le 2n}p_i^{r_i}
+  $$
+  Then our assumption should lead to 
+  \corecontent {
+  $$ Lowerbound \; \textcolor{red}{>} \prod_{p_i \le n}p_i^{r_i} \cdot \underbrace{\prod_{n < p_i \le 2n}p_i^{r_i}}_{=0}
+  $$}
+
+  \end{frame}
+
+
+% -------------------------------------------------------------------
+%Proof Idea - Summary
+% -------------------------------------------------------------------
+\begin{frame}{Proof Idea - Summary}
+
+  \corecontent {
+    $$ \frac{4^n}{2n} \; \le \binom{2n}{n} = \prod_{p_i \le n}p_i^{r_i} \cdot \prod_{n < p_i \le 2n}p_i^{r_i}
+    $$}
+    \centralquestion{What can we say about how often the primes appear in $\binom{2n}{n}$ i.e how large are the $r_i$'s ?}
+  \end{frame}
+% -------------------------------------------------------------------
+%Legendre - Theorem
+% -------------------------------------------------------------------
+\begin{frame}\frametitle{Legendre's Theorem}
+  \uncover<1->{
+\begin{bertrandbox}
+  \(n!\) contains the prime factor \(p\) exactly $\sum_{k \ge 1} \left\lfloor \frac{n}{p^k} \right\rfloor$ times 
+\end{bertrandbox}
+  }
+\uncover<1->{
+\textbf{Intuition:}
+}
+\begin{itemize}
+    \item<2-> Exactly \(\left\lfloor \frac{n}{p} \right\rfloor\) of the factors from 
+    \(n! = 1 \cdot 2 \cdot 3 \cdots n\) are divisible by \(p\) since $p, 2p, 3p, …, \left\lfloor \frac{n}{p} \right\rfloor \cdot p \leq n$.
+    
+    \item<3-> iterate over $k$ because higher powers $p^2$, $p^3$ etc. contribute additional factors of $p$ that must be counted separately.
+  \end{itemize}
+\end{frame}
+
+% -------------------------------------------------------------------
+% Legendre - Example
+% -------------------------------------------------------------------
+
+\begin{frame}\frametitle{Legendre's Theorem - Example}
+  \begin{bertrandbox}
+    \(n!\) contains the prime factor \(p\) exactly $\sum_{k \ge 1} \left\lfloor \frac{n}{p^k} \right\rfloor$ times 
+  \end{bertrandbox}
+  \textbf{Example:} $n=8$ and $p=2$
+  \begin{itemize}
+      \item[$k=1$:]<1-> \[
+1 \cdot \textcolor{red}{2} \cdot 3 \cdot \textcolor{red}{2^2} \cdot 5 \cdot (\textcolor{red}{2} \cdot 3) \cdot 7 \cdot \textcolor{red}{2^3} \implies \left\lfloor \frac{n}{p} \right\rfloor = 4
+\]
+      \item[$k=2$:]<2-> \[
+1 \cdot 2 \cdot 3 \cdot \textcolor{orange}{2^2} \cdot 5 \cdot (2 \cdot 3) \cdot 7 \cdot \textcolor{orange}{2^3} \implies \left\lfloor \frac{n}{p^2} \right\rfloor = 2
+\]
+      \item[$k=3$:]<3-> \[
+1 \cdot 2 \cdot 3 \cdot 2^2 \cdot 5 \cdot (2 \cdot 3) \cdot 7 \cdot \textcolor{violet}{2^3} \implies \left\lfloor \frac{n}{p^3} \right\rfloor = 1
+\]
+    \end{itemize}
+  \end{frame}
+
+% -------------------------------------------------------------------
+%Legendre's Theorem - Application
+% -------------------------------------------------------------------
+%keep the Legendre thm for better overview
+%color the terms to see the correspondence better
+\begin{frame}\frametitle{Legendre's Theorem - Application}
+  \uncover<1->{
+  \centralquestion{How often does prime \(p\) appear in \(\frac{(2n)!}{n!\,n!}\)?}
+  }
+  \uncover<2->{
+  \begin{center}
+  \text{\small Accounting for cancellation from the fraction yields:}
+  \[
+    \sum_{k \ge 1}
+      \Bigl(\left\lfloor \tfrac{2n}{p^k}\right\rfloor 
+      \;-\;
+      2\left\lfloor \tfrac{n}{p^k}\right\rfloor\Bigr)
+  \]
+  \end{center}
+  }
+  
+  \uncover<3->{
+  \begin{center}
+  \text{\small Because \(\lfloor x \rfloor < x\) and \(\lfloor x \rfloor > x - 1\), each summand satisfies:}
+  \[
+    \left\lfloor \tfrac{2n}{p^k}\right\rfloor
+    \;-\;
+    2\left\lfloor \tfrac{n}{p^k}\right\rfloor
+    \;\textcolor{red}{<}\;
+    \tfrac{2n}{p^k}
+    \;-\;
+    2\Bigl(\tfrac{n}{p^k} - 1\Bigr)
+    \;=\; 2
+  \]
+  \end{center}
+  }
+  
+  \uncover<4->{
+    \begin{center}
+      \text{\small Each term is 0 whenever $k > r$ and at most $1$ otherwise, thus:}
+    \end{center}
+  \begin{resultbox}
+  \[
+    \sum_{k \ge 1}
+      \Bigl(\left\lfloor \tfrac{2n}{p^k}\right\rfloor
+      \;-\;
+      2\left\lfloor \tfrac{n}{p^k}\right\rfloor\Bigr)
+    \;{\le}\;
+    \max\{\,r \;\mid\; p^r \le 2n\,\}.
+  \]
+  \end{resultbox}
+  }
+  \end{frame}
+
+
+% -------------------------------------------------------------------
+%Legendre's Theorem - Observations
+% -------------------------------------------------------------------
+\begin{frame}\frametitle{Legendre's Theorem - Observations}
+
+  % 1) Shown from overlay #1 onward
+  \uncover<1->{
+    \begin{resultbox}
+      prime \(p\) appears in \(\frac{(2n)!}{n!\,n!}\) at most 
+      \(\max\{\,r \mid p^r \le 2n\}.\)
+    \end{resultbox}
+  }
+  
+  \begin{itemize}
+    % 2) Bullet #1: revealed on overlay #2, remains afterward
+    \uncover<1->{
+      \item Largest power of \(p\) in the factorization cannot exceed \(2n\).
+    }
+  
+    % 3) Bullet #2: revealed on overlay #3, remains afterward
+    \uncover<2->{
+      \item Primes satisfying $p > \sqrt{2n}$ appear at most once.
+    }
+  
+    % 4) Bullet #3: revealed on overlay #4, remains afterward
+    \uncover<3->{
+      \item primes $p$ that satisfy $\frac{2}{3}n < p \le n$ don't appear at all.
+    }
+  \end{itemize}
+  
+  % -- Factorization at the bottom, changing each time --
+  
+  % Shown on overlay #1 ONLY
+  \only<1>{
+    \corecontent{
+      \[
+        \frac{(2n)!}{n!\,n!}
+        \;\le\;
+        \prod_{\substack{p \le 2n}} 2n
+      \]
+    }
+  }
+  
+  % Shown on overlay #2 ONLY
+  \only<2>{
+    \corecontent{      
+      \[
+      \frac{(2n)!}{n!n!}
+      \;\le\;
+      \prod_{p \le \sqrt{2n}} 2n
+      \;\cdot\;
+      \prod_{\sqrt{2n} < p \le 2n} p
+    \]}
+  }
+  
+    % Shown on overlay #3 ONLY
+    \only<3>{
+      \corecontent{      
+        \[
+        \frac{(2n)!}{n!n!}
+        \;\le\;
+        \prod_{p \le \sqrt{2n}} 2n
+        \;\cdot\;
+        \prod_{\sqrt{2n} < p \le \frac{2}{3}n} p
+        \;\cdot\;
+        \prod_{n < p \le 2n} p
+      \]}
+    }
+  
+  \end{frame}
+  
+% -------------------------------------------------------------------
+% -------------------------------------------------------------------
+
+\begin{frame}\frametitle{Extensiosnsssss}
+  Weil:
+
+  \begin{itemize}
+    \item Für \(3p > 2n\) (und \(n \ge 3\) und damit \(p \ge 3\)) sind \(p\) 
+          und \(2p\) die einzigen Vielfachen von \(p\), die im Zähler von 
+          \(\frac{(2n)!}{n!\,n!}\) vorkommen, während wir zwei 
+          \(p\)-Faktoren im Nenner haben.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Abstract Approach}
+ \bertrandpostulat
+   \begin{itemize}[<+->]          % automatischer Folienaufbau
+     \item Choose $f(n)$ that contains these primes $p$
+     \item Find a lower bound $f_{\min}(n)\le f(n)$
+     \item Assume no prime $p$ in $(n,2n]$ and show
+           $f_{\min}(n) > f(n)$ for $n\ge N$
+     \item Verify for $n\le N$
+   \end{itemize}
+\end{frame}
+
+
+
+\begin{frame}\frametitle{Product of prime numbers}
+
+\begin{bertrandbox} \[\prod_{p \leq x} p \leq 4^x - 1 \quad \text{for all real } x \geq 2\] 
+\end{bertrandbox}
+
+\begin{itemize}
+    \uncover<2->{\item Let \( q \) be the largest prime \( \leq x \), then:
+    \[\prod_{p \leq x} p = \prod_{p \leq q} p \quad \text{and} \quad 4^q - 1 \leq 4^x - 1\]}
+    
+    \uncover<3->{\item It suffices to prove for \( x = q \) (a prime).}
+    \uncover<4->{\item We proof now for all primes by induction.}
+\end{itemize}
+
+\end{frame}
+
+% -------------------------------------------------------------------
+\begin{frame}\frametitle{Inductive Base Case}
+
+\begin{itemize}
+    \uncover<1->{\item Base case: For \( q = 2 \), we have \( 2 \leq 4^{2-1}= 4 \).}
+    \uncover<2->{\item We are left with only odd primes \( q = 2m + 1 \).}
+    \uncover<3->{\item Inductive step for arbitrary odd prime:}
+\end{itemize}
+
+\end{frame}
+
+% -------------------------------------------------------------------
+\begin{frame}\frametitle{Inductive Step}
+
+$$
+  \prod_{p \leq 2m+1} p = \prod_{p \leq m+1} p \prod_{m+1 < p \leq 2m+1} p
+  \uncover<3->{\leq 4^m  \prod_{m+1<p\leq 2m+1} p }
+%   \frac{2m + 1}{m} actual bound of above
+%  \leq 4^{m^2} 2^m 
+%  = 4^{2m}
+  
+$$
+
+\uncover<2->{Using the induction hypothesis: \( \prod_{p \leq m+1} p \leq 4^m \).}
+
+\end{frame}
+
+% -------------------------------------------------------------------
+\begin{frame}\frametitle{Bounding the Prime Product}
+
+\centralquestion{Can we bound this $\prod_{m+1 < p \leq 2m+1} p $ ?}
+
+
+\begin{itemize}
+    \item Yes, \( \frac{(2m+1)!}{m! (m+1)!} \) is an integer and contains all prime numbers between $m+1$ and $2m+1$.
+    \uncover<2->{\item Follows since both denominator have factors less than  $m+1$.}
+\end{itemize}
+\uncover<2->{\begin{bertrandbox}
+     $$\prod_{p \leq 2m+1} p = \prod_{p \leq m+1} p \prod_{m+1 < p \leq 2m+1} p\leq 4^m  \binom{2m+1}{m}$$
+\end{bertrandbox}}
+\end{frame}
+
+% -------------------------------------------------------------------
+\begin{frame}\frametitle{Binomial Bound}
+
+\centralquestion{ $\binom{2m+1}{m}\leq 2^{2m}$ ? }
+\uncover<2->{
+$$
+   \binom{2m+1}{m}\cdot 2\leq  \sum_{k=0}^{2m+1} \binom{2m+1}{k} 
+  = 2^{2m+1}
+$$ }
+
+\uncover<3->{
+Since $$\binom{2m+1}{m} = \binom{2m+1}{m+1} $$}
+
+\end{frame}
+
+\begin{frame}\frametitle{Conclusion}
+Plugging everything together we get:
+\uncover<2->{\begin{bertrandbox}
+     $$\prod_{p \leq 2m+1} p = \prod_{p \leq m+1} p \prod_{m+1 < p \leq 2m+1} p\leq 4^m  \cdot 4^m = 4^{2m}$$
+\end{bertrandbox}}
+\end{frame} 
+% -------------------------------------------------------------------
+
+\begin{frame}\frametitle{Temporary results}
+\corecontent{      
+        \[
+        4^n
+        \;\le\;
+        \prod_{p \le \sqrt{2n}} 2n
+        \;\cdot\;
+        \prod_{\sqrt{2n} < p \le \frac{2}{3}n} p
+        \;\cdot\;
+        \prod_{n < p \le 2n} p
+      \]}
+\uncover<2->{      \corecontent{      
+        \[
+       (2n)^{1+\sqrt{2n}}
+        \;\cdot\;
+        4^{ \frac{2}{3}n}
+        \;\cdot\;
+        \prod_{n < p \le 2n} p
+      \]}}
+\end{frame}
+
+\begin{frame}\frametitle{Proof by Contradiction}
+Assume no prime $p$ between $n < p \leq 2n$ 
+\corecontent{      
+        \[
+        4^n
+        \;\le\;
+        (2n)^{1+\sqrt{2n}}
+        \;\cdot\;
+        4^{ \frac{2}{3}n}
+      \]}
+\uncover<2->{  \corecontent{      
+        \[
+        4^{\frac{1}{3}n}
+        \;\le\;
+        (2n)^{1+\sqrt{2n}}
+      \]}}
+\end{frame}
+
+\begin{frame}\frametitle{Intuition}
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{contra.png}
+    \caption{Plot of the \[
+        4^{\frac{1}{3}n}
+        \;\le\;
+        (2n)^{1+\sqrt{2n}}
+      \]}
+    \label{fig:enter-label}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}\frametitle{Rigorous proof}
+
+Using \( a + 1 < 2^a \) for \( a \geq 2 \), we get:
+\[
+2n = \left( \sqrt[6]{2n} \right)^6 < \left( \lfloor \sqrt[6]{2n} \rfloor + 1 \right)^6 < 2^{6 \lfloor \sqrt[6]{2n}} \rfloor \leq 2^{6 \sqrt[6]{2n}}.
+\]
+\end{frame}
+
+\begin{frame}{Verification for Small Values of $n$}
+
+\vspace{0.3cm}
+
+\begin{center}
+% First number line
+\begin{tikzpicture}[x=1\textwidth/70, y=1cm]
+    \draw[->] (0,0) -- (60,0);
+
+    % First number line primes
+    \foreach \i/\x in {0/2, 1/3, 2/5, 3/7, 4/13, 5/23, 6/43, 7/83} {
+        \ifodd\i
+            \draw[blue, thick] (\x, -0.15) -- (\x, 0.15) node[below=6pt, font=\scriptsize, blue] {\x};
+        \else
+            \draw[blue, thick] (\x, -0.15) -- (\x, 0.15) node[above=6pt, font=\scriptsize, blue] {\x};
+        \fi
+    }
+\end{tikzpicture}
+
+\vspace{1cm}
+
+% Second number line
+\begin{tikzpicture}[x=1\textwidth/70, y=1cm]
+    \draw[->] (0,0) -- (60,0);
+
+    % Second number line primes
+    \foreach \i/\x in {0/163, 1/317, 2/631, 3/1259, 4/2503, 5/4001} {
+        \ifodd\i
+            \draw[blue, thick] (\x/80, -0.15) -- (\x/80, 0.15) node[below=6pt, font=\scriptsize, blue] {\x};
+        \else
+            \draw[blue, thick] (\x/80, -0.15) -- (\x/80, 0.15) node[above=6pt, font=\scriptsize, blue] {\x};
+        \fi
+    }
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{bertrandbox}
+\textbf{Conclusion:} Every interval $\{y : n < y \leq 2n\}$, with $n \leq 4000$, contains one of these 14 primes.
+\end{bertrandbox}
+
+\end{frame}
+
+\begin{frame}\frametitle{Bounding \( 2^{2n} \) and Conclusion}
+
+For \( n \geq 50 \) (hence \( 18 < 2\sqrt{2n} \)), we obtain:
+\[
+2^{2n} \leq (2n)^{3(1+\sqrt{2n})} < 2^{6\sqrt{2n}(18+18\sqrt{2n})} < 2^{20 \sqrt{2n} \sqrt{2n}} = 2^{20(2n)^{2/3}}.
+\]
+This implies \( (2n)^{1/3} < 20 \), and thus \( n < 4000 \).
+\end{frame}
+
+
+\begin{frame}\frametitle{Further reads
+}
+
+Is there a prime number between every consecutive perfect squares?
+\end{frame}
+\end{document}
